@@ -1,0 +1,12 @@
+* Description
+  A repository for importers to orgmode format.
+
+  Presently, only contains a script to import from WordPress to
+  [[http://github.com/punchagan/org2blog][org2blog]] style posts.  It should be fairly easy to write importers
+  for other formats, though.
+
+  Licensed under GPLv3.
+
+* Dependencies
+  - [[http://johnmacfarlane.net/pandoc/][pandoc]] v1.8 or greater
+  - argparse (needs to be installed if Python v<2.7)
