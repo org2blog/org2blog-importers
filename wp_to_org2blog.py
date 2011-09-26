@@ -13,6 +13,8 @@ import os
 import argparse
 import logging
 
+
+from time import strptime, strftime
 from xml.dom import minidom
 from subprocess import Popen, PIPE
 from shlex import split
@@ -114,7 +116,14 @@ def link_to_file(link):
     name = '%s.org' % unquote(name)
     return name
 
-def blog_to_org(blog_list, name, level, buffer):
+def parse_date(date):
+    """Get YYYY-MM-DD from date string."""
+    date = date.split('+')[0].strip()
+    date = strptime(date, '%a, %d %b %Y %H:%M:%S')
+    date = strftime('%Y-%m-%d', date)
+    return date
+
+def blog_to_org(blog_list, name, level, buffer, prefix):
     """Converts a blog-list into an org file."""
 
     space = ' ' * level
@@ -137,8 +146,13 @@ def blog_to_org(blog_list, name, level, buffer):
             post['text'] = post['text'].replace('\n', '\n %s' % space)
 
         post_output = template % dict(post, **{'space': space, 'stars': stars})
+
         if buffer:
-            file_name = link_to_file(post['link'])
+            if prefix:
+                file_name = "%s-%s" % (parse_date(post['date']),
+                                       link_to_file(post['link']))
+            else:
+                file_name = link_to_file(post['link'])
             if not os.path.exists(name):
                 os.mkdir(name)
             else:
@@ -159,6 +173,8 @@ if __name__ == "__main__":
     parser.add_argument('in_file', help='the input xml file exported from WP')
     parser.add_argument('--buffer', action='store_true',
                         help='enable to obtain a separate file for each post')
+    parser.add_argument('--prefix-date', action='store_true',
+                        help='prefix a date to the post files, when --buffer')
     parser.add_argument('-l', '--level', type=int, default=1,
                         help='level of the subtree when exporting to SUBTREE')
     parser.add_argument('-o', '--out-file', default='org-posts',
@@ -175,6 +191,7 @@ if __name__ == "__main__":
     blog_list = xml_to_list(args.in_file)
 
     logger.warning("Writing posts...")
-    blog_to_org(blog_list, args.out_file, args.level, args.buffer)
+    blog_to_org(blog_list, args.out_file, args.level, args.buffer,
+                args.prefix_date)
 
     logger.warning("Done!")
