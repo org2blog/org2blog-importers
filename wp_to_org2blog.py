@@ -18,8 +18,7 @@ from subprocess import Popen, PIPE
 from shlex import split
 from urllib2 import unquote
 
-SUBTREE_TEMPLATE = \
-u"""
+SUBTREE_TEMPLATE = u"""\
 %(stars)s %(title)s %(tags)s
 %(space)s :PROPERTIES:
 %(space)s :POSTID: %(id)s
@@ -29,11 +28,9 @@ u"""
 
 %(space)s %(text)s
 
-
 """
 
-BUFFER_TEMPLATE = \
-u"""
+BUFFER_TEMPLATE = u"""\
 #+POSTID: %(id)s
 #+DATE: %(date)s
 #+OPTIONS: toc:nil num:nil todo:nil pri:nil tags:nil ^:nil TeX:nil
@@ -79,7 +76,10 @@ def xml_to_list(infile):
     	if node.getElementsByTagName('content:encoded')[0].firstChild != None:
             post['text'] = node.getElementsByTagName(
                 'content:encoded')[0].firstChild.data
+            post['text'] = post['text'].replace('\r\n', '\n')
+            post['text'] = post['text'].replace('\n', '#$NEWLINE-MARKER$#')
             post['text'] = html_to_org(post['text'].encode('utf8')).decode('utf8')
+            post['text'] = post['text'].replace('#$NEWLINE-MARKER$#', '\n')
     	else:
     	    post['text'] = ''
 
@@ -133,7 +133,8 @@ def blog_to_org(blog_list, name, level, buffer):
         post['tags'] = tag_sep.join(post['tags'])
         post['categories'] = cat_sep.join(post['categories'])
 
-        post['text'] = post['text'].replace('\n', '\n %s' % space)
+        if not buffer:
+            post['text'] = post['text'].replace('\n', '\n %s' % space)
 
         post_output = template % dict(post, **{'space': space, 'stars': stars})
         if buffer:
