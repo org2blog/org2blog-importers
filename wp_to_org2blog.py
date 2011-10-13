@@ -116,11 +116,11 @@ def link_to_file(link):
     name = '%s.org' % unquote(name)
     return name
 
-def parse_date(date):
-    """Get YYYY-MM-DD from date string."""
+def parse_date(date, format):
+    """Change wp date format to a different format."""
     date = date.split('+')[0].strip()
     date = strptime(date, '%a, %d %b %Y %H:%M:%S')
-    date = strftime('%Y-%m-%d', date)
+    date = strftime(format, date)
     return date
 
 def blog_to_org(blog_list, name, level, buffer, prefix):
@@ -141,6 +141,8 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
     for post in blog_list:
         post['tags'] = tag_sep.join(post['tags'])
         post['categories'] = cat_sep.join(post['categories'])
+        date_wp_fmt = post['date']
+        post['date'] = parse_date(date_wp_fmt, '[%Y-%m-%d %a %H:%M]')
 
         if not buffer:
             post['text'] = post['text'].replace('\n', '\n %s' % space)
@@ -149,7 +151,7 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
 
         if buffer:
             if prefix:
-                file_name = "%s-%s" % (parse_date(post['date']),
+                file_name = "%s-%s" % (parse_date(date_wp_fmt, '%Y-%m-%d'),
                                        link_to_file(post['link']))
             else:
                 file_name = link_to_file(post['link'])
