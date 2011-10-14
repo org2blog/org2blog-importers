@@ -66,24 +66,24 @@ def xml_to_list(infile):
     blog = [] # list that will contain all posts
 
     for node in dom.getElementsByTagName('item'):
-    	post = dict()
+        post = dict()
 
-    	post['title'] = node.getElementsByTagName('title')[0].firstChild.data
+        post['title'] = node.getElementsByTagName('title')[0].firstChild.data
         post['link'] = node.getElementsByTagName('link')[0].firstChild.data
-    	post['date'] = node.getElementsByTagName('pubDate')[0].firstChild.data
-    	post['author'] = node.getElementsByTagName(
+        post['date'] = node.getElementsByTagName('pubDate')[0].firstChild.data
+        post['author'] = node.getElementsByTagName(
             'dc:creator')[0].firstChild.data
-    	post['id'] = node.getElementsByTagName('wp:post_id')[0].firstChild.data
+        post['id'] = node.getElementsByTagName('wp:post_id')[0].firstChild.data
 
-    	if node.getElementsByTagName('content:encoded')[0].firstChild != None:
+        if node.getElementsByTagName('content:encoded')[0].firstChild != None:
             post['text'] = node.getElementsByTagName(
                 'content:encoded')[0].firstChild.data
             post['text'] = post['text'].replace('\r\n', '\n')
             post['text'] = post['text'].replace('\n', '#$NEWLINE-MARKER$#')
             post['text'] = html_to_org(post['text'].encode('utf8')).decode('utf8')
             post['text'] = post['text'].replace('#$NEWLINE-MARKER$#', '\n')
-    	else:
-    	    post['text'] = ''
+        else:
+            post['text'] = ''
 
         # Get the tags
         if node.getElementsByTagName('category'):
@@ -97,16 +97,16 @@ def xml_to_list(infile):
         else:
             post['tags'] = []
 
-    	# FIXME - wp:attachment_url could be use to download attachments
+        # FIXME - wp:attachment_url could be use to download attachments
 
-    	# Get the categories
-    	tempCategories = []
-    	for subnode in node.getElementsByTagName('category'):
-    		 tempCategories.append(subnode.getAttribute('nicename'))
-    	categories = [x for x in tempCategories if x != '']
-    	post['categories'] = categories
+        # Get the categories
+        tempCategories = []
+        for subnode in node.getElementsByTagName('category'):
+             tempCategories.append(subnode.getAttribute('nicename'))
+        categories = [x for x in tempCategories if x != '']
+        post['categories'] = categories
 
-    	blog.append(post)
+        blog.append(post)
 
     return blog
 
