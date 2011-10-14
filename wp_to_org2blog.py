@@ -86,25 +86,18 @@ def xml_to_list(infile):
             post['text'] = ''
 
         # Get the tags
-        if node.getElementsByTagName('category'):
-            taglist = []
-            for tag in node.getElementsByTagName('category'):
-                if tag.firstChild.data not in taglist:
-                    taglist.append(tag.firstChild.data)
+        tags_cats = {'tag': [], 'category': []}
+        for element in node.getElementsByTagName('category'):
+            domain, name = element.getAttribute('domain'), \
+                           element.getAttribute('nicename')
+            if name and domain:
+                if name not in tags_cats[domain]:
+                    tags_cats[domain].append(name)
 
-            post['tags'] = taglist
-
-        else:
-            post['tags'] = []
+        post['tags'] = tags_cats['tag']
+        post['categories'] = tags_cats['category']
 
         # FIXME - wp:attachment_url could be use to download attachments
-
-        # Get the categories
-        tempCategories = []
-        for subnode in node.getElementsByTagName('category'):
-             tempCategories.append(subnode.getAttribute('nicename'))
-        categories = [x for x in tempCategories if x != '']
-        post['categories'] = categories
 
         blog.append(post)
 
@@ -140,6 +133,8 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
 
     for post in blog_list:
         post['tags'] = tag_sep.join(post['tags'])
+        if tag_sep == ':':
+            post['tags'] = ':' + post['tags'] + ':'
         post['categories'] = cat_sep.join(post['categories'])
         date_wp_fmt = post['date']
         post['date'] = parse_date(date_wp_fmt, '[%Y-%m-%d %a %H:%M]')
