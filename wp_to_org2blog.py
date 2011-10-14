@@ -91,6 +91,7 @@ def xml_to_list(infile):
             domain, name = element.getAttribute('domain'), \
                            element.getAttribute('nicename')
             if name and domain:
+                name = element.firstChild.data
                 if name not in tags_cats[domain]:
                     tags_cats[domain].append(name)
 
