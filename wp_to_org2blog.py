@@ -85,18 +85,19 @@ def xml_to_list(infile):
         else:
             post['text'] = ''
 
-        # Get the tags
-        tags_cats = {'tag': [], 'category': []}
+        # Get the tags and categories
+        post['tags'], post['categories'] = [], []
+
         for element in node.getElementsByTagName('category'):
             domain, name = element.getAttribute('domain'), \
                            element.getAttribute('nicename')
-            if name and domain:
+            if name and domain and ('tag' in domain or 'category' in domain):
                 name = element.firstChild.data
-                if name not in tags_cats[domain]:
-                    tags_cats[domain].append(name)
+                domain = 'tags' if 'tag' in domain else 'categories'
+                post[domain].append(name)
 
-        post['tags'] = tags_cats['tag']
-        post['categories'] = tags_cats['category']
+        for domain in ['tags', 'categories']:
+            post[domain] = sorted(set(post[domain]))
 
         # FIXME - wp:attachment_url could be use to download attachments
 
