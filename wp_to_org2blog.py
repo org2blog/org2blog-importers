@@ -1,6 +1,20 @@
 #!/usr/bin/env python
 
-"""wp_to_org2blog.py: Convert wordpress.xml to org2blog posts."""
+"""wp_to_org2blog.py: Convert wordpress.xml to org2blog posts.
+
+To create and export of Posts and nothing else:
+
+- Log in to your WordPress site
+- Dashboard, Tools, Export
+- Posts
+  - Categories: All
+  - Authors: All
+  - Date range start, end: "Start Date", "End Date"
+    - Returns every post
+  - Status: All
+- Direct download and add.
+
+"""
 
 __author__ = "Puneeth Chaganti"
 __copyright__ = "Copyright 2011"
