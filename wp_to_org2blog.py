@@ -61,7 +61,7 @@ BUFFER_TEMPLATE = u"""\
 
 def html_to_org(html):
     """Converts a html snippet to an org-snippet."""
-    command = 'pandoc -r html -t org --no-wrap -'
+    command = 'pandoc -r html -t org --wrap=none -'
     args = split(command)
     p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate(html)
@@ -69,6 +69,54 @@ def html_to_org(html):
         return output
     else:
         raise Exception(error)
+
+def get_firstChild_data(node, element):
+    try:
+        return node.getElementsByTagName(element)[0].firstChild.data
+    except (AttributeError, IndexError):
+        return None
+
+def node_to_post(node):
+    """Takes an XML node from the export and converts it to a dict"""
+    key_map = {
+        'title': 'title',
+        'link': 'link',
+        'date': 'pubDate',
+        'author': 'dc:creator',
+        'id': 'wp:post_id',
+        'text': 'content:encoded'
+    }
+    post = dict()
+
+    for key, el in key_map.items():
+        post[key] = get_firstChild_data(node, el)
+
+    try:
+        if int(post['id']) % 10 == 0:
+            logging.getLogger().info("Processing post #%s" % post['id'])
+    except:
+        logging.getLogger().debug("Processing post #%s" % post['id'])
+
+    if post['text'] != None:
+        post['text'] = post['text'].replace('\r\n', '\n')
+        post['text'] = post['text'].replace('\n', '#$NEWLINE-MARKER$#')
+        post['text'] = html_to_org(post['text'].encode('utf8')).decode('utf8')
+        post['text'] = post['text'].replace('#$NEWLINE-MARKER$#', '\n')
+    else:
+        post['text'] = ''
+
+    # Get the tags and categories
+    post['tags'], post['categories'] = [], []
+
+    for element in node.getElementsByTagName('category'):
+        domain, name = element.getAttribute('domain'), element.getAttribute('nicename')
+
+    if name and domain and ('tag' in domain or 'category' in domain):
+        name = element.firstChild.data
+        domain = 'tags' if 'tag' in domain else 'categories'
+        post[domain].append(name)
+
+    return post
 
 def xml_to_list(infile):
     """Return a list containing all the posts from the infile.
@@ -82,33 +130,7 @@ def xml_to_list(infile):
     for node in dom.getElementsByTagName('item'):
         post = dict()
 
-        post['title'] = node.getElementsByTagName('title')[0].firstChild.data
-        post['link'] = node.getElementsByTagName('link')[0].firstChild.data
-        post['date'] = node.getElementsByTagName('pubDate')[0].firstChild.data
-        post['author'] = node.getElementsByTagName(
-            'dc:creator')[0].firstChild.data
-        post['id'] = node.getElementsByTagName('wp:post_id')[0].firstChild.data
-
-        if node.getElementsByTagName('content:encoded')[0].firstChild != None:
-            post['text'] = node.getElementsByTagName(
-                'content:encoded')[0].firstChild.data
-            post['text'] = post['text'].replace('\r\n', '\n')
-            post['text'] = post['text'].replace('\n', '#$NEWLINE-MARKER$#')
-            post['text'] = html_to_org(post['text'].encode('utf8')).decode('utf8')
-            post['text'] = post['text'].replace('#$NEWLINE-MARKER$#', '\n')
-        else:
-            post['text'] = ''
-
-        # Get the tags and categories
-        post['tags'], post['categories'] = [], []
-
-        for element in node.getElementsByTagName('category'):
-            domain, name = element.getAttribute('domain'), \
-                           element.getAttribute('nicename')
-            if name and domain and ('tag' in domain or 'category' in domain):
-                name = element.firstChild.data
-                domain = 'tags' if 'tag' in domain else 'categories'
-                post[domain].append(name)
+        post = node_to_post( node )
 
         for domain in ['tags', 'categories']:
             post[domain] = sorted(set(post[domain]))
@@ -127,10 +149,12 @@ def link_to_file(link):
 
 def parse_date(date, format):
     """Change wp date format to a different format."""
-    date = date.split('+')[0].strip()
-    date = strptime(date, '%a, %d %b %Y %H:%M:%S')
-    date = strftime(format, date)
-    return date
+
+    if date != None:
+        date = date.split('+')[0].strip()
+        date = strptime(date, '%a, %d %b %Y %H:%M:%S')
+        date = strftime(format, date)
+        return date
 
 def blog_to_org(blog_list, name, level, buffer, prefix):
     """Converts a blog-list into an org file."""
@@ -196,7 +220,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     FORMAT = '%(message)s'
-    logging.basicConfig(format=FORMAT)
+    logging.basicConfig(format=FORMAT, level=logging.INFO)
     logger = logging.getLogger()
 
 
