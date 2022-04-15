@@ -100,9 +100,9 @@ def node_to_post(node):
 
     try:
         if int(post['id']) % 10 == 0:
-            logging.getLogger().info("Processing post #%s" % post['id'])
+            logging.getLogger().info("Processing post #%s", post['id'])
     except ValueError:
-        logging.getLogger().debug("Processing post #%s" % post['id'])
+        logging.getLogger().debug("Processing post #%s", post['id'])
 
     if post['text'] != None:
         post['text'] = post['text'].replace('\r\n', '\n')
