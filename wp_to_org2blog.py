@@ -24,6 +24,7 @@ __email__ = "punchagan@muse-amuse.in"
 
 
 import os
+import re
 import argparse
 import logging
 
@@ -94,7 +95,8 @@ def node_to_post(node):
         'date': 'pubDate',
         'author': 'dc:creator',
         'id': 'wp:post_id',
-        'text': 'content:encoded'
+        'text': 'content:encoded',
+        'post_name': 'wp:post_name'
     }
     post = dict()
 
@@ -151,10 +153,29 @@ def xml_to_list(infile):
 
     return blog
 
-def link_to_file(link):
+def link_to_file(link, post_name=None):
     """Gets filename from wordpress url."""
-    name = link.split('/')[-2]
-    name = '%s.org' % unquote(name)
+
+    name = None
+    check_for_letters = re.compile('[a-z]+', re.IGNORECASE)
+    try:
+        if (post_name != "") and (post_name is not None):
+            if check_for_letters.match(post_name) is not None:
+                name = post_name
+            else:
+                name = None
+
+        if name is None:
+            if "?p=" in link:
+                name = link.split('?p=')[-1]
+            else:
+                name = link.split('/')[-2]
+
+        name = '%s.org' % unquote(name)
+    # occasionally, some encoding errors may seep through
+    except TypeError:
+        logging.getLogger().debug("Error getting file link for %s, %s", link, post_name)
+
     return name
 
 def parse_date(date, date_format):
@@ -204,9 +225,9 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
         if buffer:
             if prefix:
                 file_name = "%s-%s" % (parse_date(date_wp_fmt, '%Y-%m-%d'),
-                                       link_to_file(post['link']))
+                                       link_to_file(post['link'], post['post_name']))
             else:
-                file_name = link_to_file(post['link'])
+                file_name = link_to_file(post['link'], post['post_name'])
             if not os.path.exists(name):
                 os.mkdir(name)
             else:
