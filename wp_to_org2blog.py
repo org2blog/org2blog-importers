@@ -105,7 +105,7 @@ def node_to_post(node):
     except ValueError:
         logging.getLogger().debug("Processing post #%s", post['id'])
 
-    if post['text'] != None:
+    if post['text'] is not None:
         post['text'] = post['text'].replace('\r\n', '\n')
         post['text'] = post['text'].replace('\n', '#$NEWLINE-MARKER$#')
         post['text'] = html_to_org(post['text'].encode('utf8')).decode('utf8')
@@ -155,13 +155,13 @@ def link_to_file(link):
     name = '%s.org' % unquote(name)
     return name
 
-def parse_date(date, format):
+def parse_date(date, date_format):
     """Change wp date format to a different format."""
 
-    if date != None:
+    if date is not None:
         date = date.split('+')[0].strip()
         date = strptime(date, '%a, %d %b %Y %H:%M:%S')
-        date = strftime(format, date)
+        date = strftime(date_format, date)
 
     return date
 
