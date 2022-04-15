@@ -30,7 +30,7 @@ import logging
 
 from time import strptime, strftime
 from xml.dom import minidom
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, SubprocessError
 from shlex import split
 from urllib.parse import unquote
 
@@ -61,14 +61,21 @@ BUFFER_TEMPLATE = u"""\
 
 def html_to_org(html):
     """Converts a html snippet to an org-snippet."""
+
     command = 'pandoc -r html -t org --wrap=none -'
     args = split(command)
+
     p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate(html)
-    if not error:
-        return output
-    else:
-        raise Exception(error)
+
+    if (p.returncode != 0) or (error is not None):
+        errormessage = """%s exited with return code %s and error %s when parsing:
+            %s"""
+        raise SubprocessError(
+            errormessage % (args[0], p.returncode, error, html)
+        )
+
+    return output
 
 def get_firstChild_data(node, element):
     try:
@@ -111,10 +118,10 @@ def node_to_post(node):
     for element in node.getElementsByTagName('category'):
         domain, name = element.getAttribute('domain'), element.getAttribute('nicename')
 
-    if name and domain and ('tag' in domain or 'category' in domain):
-        name = element.firstChild.data
-        domain = 'tags' if 'tag' in domain else 'categories'
-        post[domain].append(name)
+        if name and domain and ('tag' in domain or 'category' in domain):
+            name = element.firstChild.data
+            domain = 'tags' if 'tag' in domain else 'categories'
+            post[domain].append(name)
 
     return post
 
@@ -154,7 +161,8 @@ def parse_date(date, format):
         date = date.split('+')[0].strip()
         date = strptime(date, '%a, %d %b %Y %H:%M:%S')
         date = strftime(format, date)
-        return date
+
+    return date
 
 def blog_to_org(blog_list, name, level, buffer, prefix):
     """Converts a blog-list into an org file."""
