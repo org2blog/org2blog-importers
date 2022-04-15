@@ -139,7 +139,6 @@ def xml_to_list(infile):
     blog = list()  # list that will contain all posts
 
     for node in dom.getElementsByTagName('item'):
-        post = dict()
 
         post = node_to_post( node )
 
@@ -184,7 +183,7 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
     else:
         template = SUBTREE_TEMPLATE
         tag_sep = ':'
-        org_file = open('%s.org' % name, 'w')
+        org_file = open('%s.org' % name, 'wb')
 
     for post in blog_list:
         post['tags'] = tag_sep.join(post['tags'])
@@ -211,7 +210,7 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
             if not os.path.exists(name):
                 os.mkdir(name)
             else:
-                org_file = open(os.path.join(name, file_name), 'w')
+                org_file = open(os.path.join(name, file_name), 'wb')
                 org_file.write(post_output.encode('utf8'))
                 org_file.close()
         else:
