@@ -78,6 +78,7 @@ def html_to_org(html):
     return output
 
 def get_firstChild_data(node, element):
+    """Try to retrieve the data contained at a node's firstChild element."""
     try:
         return node.getElementsByTagName(element)[0].firstChild.data
     except (AttributeError, IndexError):
