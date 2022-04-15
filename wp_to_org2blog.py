@@ -70,7 +70,7 @@ def html_to_org(html):
     proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, error = proc.communicate(html)
 
-    if (proc.returncode != 0) or (error is not None):
+    if (proc.returncode != 0) or (error != b""):
         errormessage = """%s exited with return code %s and error %s when parsing:
             %s"""
         raise SubprocessError(errormessage % (args[0], proc.returncode, error, html))
