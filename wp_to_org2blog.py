@@ -94,7 +94,7 @@ def node_to_post(node):
     try:
         if int(post['id']) % 10 == 0:
             logging.getLogger().info("Processing post #%s" % post['id'])
-    except:
+    except ValueError:
         logging.getLogger().debug("Processing post #%s" % post['id'])
 
     if post['text'] != None:
