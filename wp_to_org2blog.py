@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """wp_to_org2blog.py: Convert wordpress.xml to org2blog posts.
 
