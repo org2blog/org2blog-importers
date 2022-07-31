@@ -65,27 +65,29 @@ def html_to_org(html):
     command = 'pandoc -r html -t org --wrap=none -'
     args = split(command)
 
-    p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    output, error = p.communicate(html)
+    proc = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    output, error = proc.communicate(html)
 
-    if (p.returncode != 0) or (error is not None):
+    if (proc.returncode != 0) or (error is not None):
         errormessage = """%s exited with return code %s and error %s when parsing:
             %s"""
         raise SubprocessError(
-             errormessage % (args[0], p.returncode, error, html)
+             errormessage % (args[0], proc.returncode, error, html)
         )
 
     return output
 
-def get_firstChild_data(node, element):
-    """Try to retrieve the data contained at a node's firstChild element."""
+def get_first_child_data(node, tag_name):
+    """Try to retrieve the data contained at a node's tag's firstChild."""
     try:
-        return node.getElementsByTagName(element)[0].firstChild.data
+        return node.getElementsByTagName(tag_name)[0].firstChild.data
     except (AttributeError, IndexError):
         return None
 
 def node_to_post(node):
     """Takes an XML node from the export and converts it to a dict"""
+
+    # key: (XML) tag_name
     key_map = {
         'title': 'title',
         'link': 'link',
@@ -96,8 +98,8 @@ def node_to_post(node):
     }
     post = dict()
 
-    for key, el in key_map.items():
-        post[key] = get_firstChild_data(node, el)
+    for key, tag_name in key_map.items():
+        post[key] = get_first_child_data(node, tag_name)
 
     try:
         if int(post['id']) % 10 == 0:
@@ -178,7 +180,7 @@ def blog_to_org(blog_list, name, level, separate_buffer, prefix):
     else:
         template = SUBTREE_TEMPLATE
         tag_sep = ':'
-        f = open('%s.org' % name, 'w')
+        org_file = open('%s.org' % name, 'w')
 
     for post in blog_list:
         post['tags'] = tag_sep.join(post['tags'])
@@ -202,13 +204,13 @@ def blog_to_org(blog_list, name, level, separate_buffer, prefix):
             if not os.path.exists(name):
                 os.mkdir(name)
             else:
-                f = open(os.path.join(name, file_name), 'w')
-                f.write(post_output.encode('utf8'))
-                f.close()
+                org_file = open(os.path.join(name, file_name), 'w')
+                org_file.write(post_output.encode('utf8'))
+                org_file.close()
         else:
-            f.write(post_output.encode('utf8'))
+            org_file.write(post_output.encode('utf8'))
 
-    f.close()
+    org_file.close()
 
 def main():
     parser = argparse.ArgumentParser(
@@ -226,8 +228,8 @@ def main():
 
     args = parser.parse_args()
 
-    FORMAT = '%(message)s'
-    logging.basicConfig(format=FORMAT, level=logging.INFO)
+    logging_format = '%(message)s'
+    logging.basicConfig(format=logging_format, level=logging.INFO)
     logger = logging.getLogger()
 
 
