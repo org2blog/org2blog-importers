@@ -111,10 +111,10 @@ def node_to_post(node):
     for element in node.getElementsByTagName('category'):
         domain, name = element.getAttribute('domain'), element.getAttribute('nicename')
 
-    if name and domain and ('tag' in domain or 'category' in domain):
-        name = element.firstChild.data
-        domain = 'tags' if 'tag' in domain else 'categories'
-        post[domain].append(name)
+        if name and domain and ('tag' in domain or 'category' in domain):
+            name = element.firstChild.data
+            domain = 'tags' if 'tag' in domain else 'categories'
+            post[domain].append(name)
 
     return post
 
