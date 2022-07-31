@@ -155,13 +155,13 @@ def link_to_file(link):
     name = '%s.org' % unquote(name)
     return name
 
-def parse_date(date, format):
+def parse_date(date, date_format):
     """Change wp date format to a different format."""
 
     if date is not None:
         date = date.split('+')[0].strip()
         date = strptime(date, '%a, %d %b %Y %H:%M:%S')
-        date = strftime(format, date)
+        date = strftime(date_format, date)
 
         return date
 
