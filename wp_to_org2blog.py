@@ -142,7 +142,7 @@ def xml_to_list(infile):
     try:
         dom = minidom.parse(infile)
     except ExpatError as err:
-        print("Error while parsing %s: %s" % (infile, err))
+        logging.getLogger().debug("Error while parsing %s: %s", infile, err)
         raise
 
     blog = list()  # list that will contain all posts
