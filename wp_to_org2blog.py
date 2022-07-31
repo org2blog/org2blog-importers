@@ -32,7 +32,7 @@ from time import strptime, strftime
 from xml.dom import minidom
 from subprocess import Popen, PIPE
 from shlex import split
-from urllib2 import unquote
+from urllib.parse import unquote
 
 SUBTREE_TEMPLATE = u"""\
 %(stars)s %(title)s %(tags)s
