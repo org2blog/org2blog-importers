@@ -109,7 +109,7 @@ def node_to_post(node):
         if int(post["id"]) % 10 == 0:
             logging.getLogger().info("Processing post #%s", post["id"])
     except ValueError:
-        logging.getLogger().debug("Processing post #%s", post["id"])
+        logging.getLogger().warning("Processing post #%s", post["id"])
 
     if post["text"] is not None:
         post["text"] = post["text"].replace("\r\n", "\n")
@@ -142,7 +142,7 @@ def xml_to_list(infile):
     try:
         dom = minidom.parse(infile)
     except ExpatError as err:
-        logging.getLogger().debug("Error while parsing %s: %s", infile, err)
+        logging.getLogger().error("Error while parsing %s: %s", infile, err)
         raise
 
     blog = list()  # list that will contain all posts
@@ -182,7 +182,9 @@ def link_to_file(link, post_name=None):
         name = "%s.org" % unquote(name)
     # occasionally, some encoding errors may seep through
     except TypeError:
-        logging.getLogger().debug("Error getting file link for %s, %s", link, post_name)
+        logging.getLogger().warning(
+            "Error getting file link for %s, %s", link, post_name
+        )
 
     return name
 
@@ -288,13 +290,13 @@ def main():
     logging.basicConfig(format=logging_format, level=logging.INFO)
     logger = logging.getLogger()
 
-    logger.warning("Parsing xml ...")
+    logger.info("Parsing xml ...")
     blog_list = xml_to_list(args.in_file)
 
-    logger.warning("Writing posts...")
+    logger.info("Writing posts...")
     blog_to_org(blog_list, args.out_file, args.level, args.buffer, args.prefix_date)
 
-    logger.warning("Done!")
+    logger.info("Done!")
 
 
 if __name__ == "__main__":
