@@ -61,10 +61,13 @@ BUFFER_TEMPLATE = u"""\
 
 def html_to_org(html):
     """Converts a html snippet to an org-snippet."""
+
     command = 'pandoc -r html -t org --wrap=none -'
     args = split(command)
+
     p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate(html)
+
     if not error:
         return output
     else:
@@ -154,6 +157,7 @@ def parse_date(date, format):
         date = date.split('+')[0].strip()
         date = strptime(date, '%a, %d %b %Y %H:%M:%S')
         date = strftime(format, date)
+
         return date
 
 def blog_to_org(blog_list, name, level, buffer, prefix):
