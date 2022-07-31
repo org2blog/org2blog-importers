@@ -202,8 +202,6 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
     f.close()
 
 if __name__ == "__main__":
-
-    import argparse
     parser = argparse.ArgumentParser(
         description='Convert wordpress.xml to org2blog posts.')
 
