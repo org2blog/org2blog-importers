@@ -139,7 +139,6 @@ def xml_to_list(infile):
     blog = list() # list that will contain all posts
 
     for node in dom.getElementsByTagName('item'):
-        post = dict()
 
         post = node_to_post( node )
 
