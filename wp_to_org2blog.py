@@ -31,6 +31,7 @@ import logging
 
 from time import strptime, strftime
 from xml.dom import minidom
+from xml.parsers.expat import ExpatError
 from subprocess import Popen, PIPE, SubprocessError
 from shlex import split
 from urllib.parse import unquote
@@ -138,7 +139,11 @@ def xml_to_list(infile):
     Each post is a dictionary.
     """
 
-    dom = minidom.parse(infile)
+    try:
+        dom = minidom.parse(infile)
+    except ExpatError as err:
+        print("Error while parsing %s: %s" % (infile, err))
+        raise
 
     blog = list()  # list that will contain all posts
 
