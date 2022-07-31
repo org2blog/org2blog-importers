@@ -116,7 +116,8 @@ def node_to_post(node):
         post['text'] = ''
 
     # Get the tags and categories
-    post['tags'], post['categories'] = [], []
+    post['tags'] = list()
+    post['categories'] = list()
 
     for element in node.getElementsByTagName('category'):
         domain, name = element.getAttribute('domain'), element.getAttribute('nicename')
@@ -135,7 +136,7 @@ def xml_to_list(infile):
 
     dom = minidom.parse(infile)
 
-    blog = [] # list that will contain all posts
+    blog = list() # list that will contain all posts
 
     for node in dom.getElementsByTagName('item'):
         post = dict()
@@ -173,7 +174,10 @@ def blog_to_org(blog_list, name, level, separate_buffer, prefix):
     space = ' ' * level
     stars = '*' * level
 
-    tag_sep = cat_sep = ', '
+    tag_sep = ', '
+    cat_sep = ', '
+
+    template_parts = dict()
 
     if separate_buffer:
         template = BUFFER_TEMPLATE
@@ -193,7 +197,10 @@ def blog_to_org(blog_list, name, level, separate_buffer, prefix):
         if not separate_buffer:
             post['text'] = post['text'].replace('\n', '\n %s' % space)
 
-        post_output = template % dict(post, **{'space': space, 'stars': stars})
+        template_parts.update(**post)
+        template_parts.update(space=space)
+        template_parts.update(stars=stars)
+        post_output = template % template_parts
 
         if separate_buffer:
             if prefix:
