@@ -30,7 +30,7 @@ import logging
 
 from time import strptime, strftime
 from xml.dom import minidom
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, SubprocessError
 from shlex import split
 from urllib.parse import unquote
 
@@ -68,10 +68,14 @@ def html_to_org(html):
     p = Popen(args, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     output, error = p.communicate(html)
 
-    if not error:
-        return output
-    else:
-        raise Exception(error)
+    if (p.returncode != 0) or (error is not None):
+        errormessage = """%s exited with return code %s and error %s when parsing:
+            %s"""
+        raise SubprocessError(
+             errormessage % (args[0], p.returncode, error, html)
+        )
+
+    return output
 
 def get_firstChild_data(node, element):
     try:
