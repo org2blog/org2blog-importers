@@ -165,7 +165,7 @@ def parse_date(date, date_format):
 
         return date
 
-def blog_to_org(blog_list, name, level, buffer, prefix):
+def blog_to_org(blog_list, name, level, separate_buffer, prefix):
     """Converts a blog-list into an org file."""
 
     space = ' ' * level
@@ -173,7 +173,7 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
 
     tag_sep = cat_sep = ', '
 
-    if buffer:
+    if separate_buffer:
         template = BUFFER_TEMPLATE
     else:
         template = SUBTREE_TEMPLATE
@@ -188,12 +188,12 @@ def blog_to_org(blog_list, name, level, buffer, prefix):
         date_wp_fmt = post['date']
         post['date'] = parse_date(date_wp_fmt, '[%Y-%m-%d %a %H:%M]')
 
-        if not buffer:
+        if not separate_buffer:
             post['text'] = post['text'].replace('\n', '\n %s' % space)
 
         post_output = template % dict(post, **{'space': space, 'stars': stars})
 
-        if buffer:
+        if separate_buffer:
             if prefix:
                 file_name = "%s-%s" % (parse_date(date_wp_fmt, '%Y-%m-%d'),
                                        link_to_file(post['link']))
